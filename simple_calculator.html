@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Carlos Barros">
+    <meta name="e-mail" content="barr0688@algonquinlive.com">
+    <title>Lab 6 - Calculator Challenge - Carlos Barros</title>
+    <style>
+      :root{
+        --bg-main-color: rgba(231, 219, 221, 0.459);
+        --bg-calculator-color: black;
+        --bg-buttons-color: white;
+        --buttons-color: black;
+        --bg-display-color: white;
+        --display-color: black;
+        --bg-buttons-color-hover: rgba(231, 219, 221, 0.459);
+      }
+      *{
+          margin: 0;
+          padding: 0;
+      }
+      .background{
+          background-color: var(--bg-main-color);
+          height: 100vh;
+          color: white;
+          font-family: Tahoma, Geneva, Verdana, sans-serif;
+          text-align: center;
+      }
+      .calculator{
+          position: absolute; /* pra ela ocupar somente o espaço dela */
+          background-color: var(--bg-calculator-color);
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%); /* para colocar o elemento no centro */
+          border-radius: 15px;
+          padding: 15px;
+          width: 300px;
+          height: 400px;
+      }
+      .buttons{
+          width: 65px;
+          height: 65px;
+          font-size: 25px;
+          cursor: pointer;
+          background-color: var(--bg-buttons-color);
+          border: none;
+          color: var(--buttons-color);
+          margin: 3px;
+      }
+      .buttons:hover{
+          background-color: var(--bg-buttons-color-hover);
+      }      
+      .dark-button{
+          width: 200px;
+          height: 50px;
+          font-size: 25px;
+          cursor: pointer;
+          background-color: rgb(0,42,54);
+          border: none;
+          color: white;
+          margin: 10px;
+          content: 'light mode';
+      }
+      .dark-button:hover{
+          background-color: rgb(3, 106, 134);
+      }
+      .display-value{
+          width: 270px;
+          background-color: var(--bg-display-color);
+          height: 30px;
+          margin: 5px;
+          font-size: 25px;
+          color: var(--display-color);
+          text-align: right;
+          padding: 5px;
+      }
+      .dark{
+          --bg-main-color: rgb(31, 31, 31);
+          --bg-calculator-color: white;
+          --bg-buttons-color: rgb(31, 31, 31);
+          --bg-display-color: black;
+          --display-color: white;
+          --buttons-color: white;
+          --bg-buttons-color-hover: rgb(58, 57, 57);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background">
+      <div class="calculator">
+        <div class="display-value">0</div>
+        <table>
+          <tr>
+            <td><button class="buttons" onclick="insert('7')">7</button></td>
+            <td><button class="buttons" onclick="insert('8')">8</button></td>
+            <td><button class="buttons" onclick="insert('9')">9</button></td>
+            <td><button class="buttons" onclick="chooseOperation('-')">-</button></td>
+          </tr>
+          <tr>
+            <td><button class="buttons" onclick="insert('4')">4</button></td>
+            <td><button class="buttons" onclick="insert('5')">5</button></td>
+            <td><button class="buttons" onclick="insert('6')">6</button></td>
+            <td><button class="buttons" onclick="chooseOperation('/')">/</button></td>
+          </tr>
+          <tr>
+            <td><button class="buttons" onclick="insert('1')">1</button></td>
+            <td><button class="buttons" onclick="insert('2')">2</button></td>
+            <td><button class="buttons" onclick="insert('3')">3</button></td>
+            <td><button class="buttons" onclick="chooseOperation('*')">x</button></td>
+          </tr>
+          <tr>
+            <td><button class="buttons" onclick="insert('0')">0</button></td>
+            <td><button class="buttons" onclick="cleanDisplay()">C</button></td>
+            <td><button class="buttons" onclick="calculate()">=</button></td>
+            <td><button class="buttons" onclick="chooseOperation('+')">+</button></td>
+          </tr> 
+        </table>
+        <button class="dark-button" onclick="theme()">dark mode</button>
+      </div>
+    </div>
+    <script>
+      const display = document.querySelector(".display-value");
+      var memory; //to armazene the memory
+      var displayValue = " "; //to initialize the displayvalue empty
+      var operation;
+
+      function calculate() {
+        let result;
+        const floatMemory = parseFloat(memory); //convert the string to a number to do the math
+        const floatDisplayValue = parseFloat(displayValue); //convert the string to a number to do the math
+
+        if (isNaN(floatMemory) || isNaN(floatDisplayValue)) return; //if there is no value on the memory or on the current display, do nothing
+        switch (operator) {
+          case "+":
+            result = floatMemory + floatDisplayValue;
+            break;
+          case "-":
+            result = floatMemory - floatDisplayValue;
+            break;
+          case "/":
+            result = floatMemory / floatDisplayValue;
+            break;
+          case "*":
+            result = floatMemory * floatDisplayValue;
+            break;
+          default:
+            return;
+        }
+      
+        displayValue = result;
+        operator = undefined;
+        memory = "";
+        updateDisplay();
+      }
+
+      function chooseOperation(operation) {
+        if (displayValue === "") return; //if the display is empty, do nothing
+        if (memory !== "") { //if we have value on the memory, do the calculation
+          calculate();
+          updateDisplay(); //to display the result of the calculation without click on the equal button
+        }
+        operator = operation;
+        memory = displayValue;
+        displayValue = ""; //to take the new number inputed by the user
+      }
+
+      function insert(number) {
+        displayValue = `${displayValue}${number.toString()}`; /* add the number as a string to concatenate */
+        updateDisplay();
+      }
+
+      function cleanDisplay() {
+        displayValue = "0";
+        memory = " ";
+        operation = undefined;
+        updateDisplay();
+      }
+
+      function updateDisplay() {
+        memory = `${memory} ${operation || ""}`; //save in the memory the value plus the operation symbol
+        display.innerText = displayValue;
+      }
+
+      /* Change themes */
+      const btn = document.querySelector(".dark-button")
+
+      function theme(){ /* waiting the event click on btn */
+          document.body.classList.toggle("dark"); /* verifies if body tag is with the class dark and add/remove it */
+          if (btn.textContent == "dark mode"){
+            btn.textContent = "light mode";
+          } else{
+            btn.textContent = "dark mode";
+          }
+      }
+    </script>
+  </body>
+</html>
